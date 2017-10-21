@@ -11,10 +11,11 @@ from .recognizer import SpeechRecognizer
 
 
 class Server:
-    def __init__(self, asr: SpeechRecognizer):
+    def __init__(self, asr: SpeechRecognizer, use_cache=True):
         self.app = web.Application()
         self.app.router.add_post('/recognize', self.recognize_request)
         self.asr = asr
+        self.use_cache = use_cache
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def start(self, host: int, port: int):
@@ -29,11 +30,11 @@ class Server:
         url = params.get("url", None)
         user_id = params.get("user_id", None)
 
-        if url is None:
+        if url is None and url is None:
             return web.Response(text="url is not specified", status=HTTPStatus.BAD_REQUEST)
 
-        if not url.endswith(".ogg"):
-            return web.Response(text="use ogg format", status=HTTPStatus.BAD_REQUEST)
+        if url and not self._is_mp3(url):
+            return web.Response(text="invalid url to mp3 file", status=HTTPStatus.BAD_REQUEST)
 
         try:
             with orm.db_session:
@@ -50,17 +51,27 @@ class Server:
         if user_id:
             user = User.get(id=user_id) or User(id=user_id, uuid=uuid.uuid4())
 
-        audio = Audio.get(url=url)
-
         # return text if audio was recognized before
-        if audio and audio.text is not None:
-            return audio.text
+        if self.use_cache:
+            audio = Audio.get(url=url)
+
+            if audio and audio.text is not None:
+                return audio.text
 
         text = await self.asr.recognize(url, user.uuid if user else None)
 
         try:
-            Audio(url=url, text=text, user=user)
+            if self.use_cache:
+                Audio(url=url, text=text, user=user)
         except Exception as e:
             self.logger.error("Failed to insert audio: {}".format(str(e)))
 
         return text
+
+    @staticmethod
+    def _is_mp3(url):
+        return url.endswith(".mp3")
+
+    @staticmethod
+    def _is_ogg(url):
+        return url.endswith(".ogg")

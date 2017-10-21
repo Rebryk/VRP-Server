@@ -37,7 +37,8 @@ class YSRecognizer(SpeechRecognizer):
             params = {
                 "uuid": uuid.hex if uuid else YSRecognizer.EMPTY_UUID.hex,
                 "topic": "queries",
-                "key": self.api_key
+                "key": self.api_key,
+                "disableAntimat": "true"
             }
 
             file = await self._download_ogg(session, url)
