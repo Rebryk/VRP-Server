@@ -3,7 +3,7 @@
 We use Google Cloud Speech API to recognize audio files. <br>
 Send a `POST` request to recognize your audio file.
 
-## POST request
+### POST request
 `URL`: https://vrp.eu.ngrok.io/recognize <br>
 `Content-Type`: application/json
 
@@ -36,3 +36,7 @@ Fields:
   "api_key": <api_key>
 }
 ```
+
+### Related projects
+* [Voice recognition bot](https://github.com/Rebryk/VRP-Bot)
+* [Voice recognition extension for Chrome](https://github.com/Rebryk/VRP-Chrome-Extension/)
