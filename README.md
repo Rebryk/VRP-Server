@@ -1,7 +1,7 @@
-# Voice recognition plugin server
+# Voice recognition server
 
-Send a `POST` request to recognize your audio file. <br>
-We use Google Cloud Speech API to recognize audio files.
+We use Google Cloud Speech API to recognize audio files. <br>
+Send a `POST` request to recognize your audio file.
 
 ## POST request
 `URL`: https://vrp.eu.ngrok.io/recognize <br>
