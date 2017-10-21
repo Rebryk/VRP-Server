@@ -12,8 +12,17 @@ class YSRecognizer(SpeechRecognizer):
     EMPTY_UUID = UUID("00000000000000000000000000000000")
     URL = "https://asr.yandex.net/asr_xml?"
 
-    def __init__(self, api_key: str):
+    def __init__(self,
+                 api_key: str,
+                 topic: str = "notes",
+                 disable_antimat: bool = True,
+                 capitalize: bool = True,
+                 punctuation: bool = True):
         self.api_key = api_key
+        self.topic = topic
+        self.disable_antimat = disable_antimat
+        self.capitalize = capitalize
+        self.punctuation = punctuation
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @staticmethod
@@ -36,9 +45,11 @@ class YSRecognizer(SpeechRecognizer):
         async with ClientSession() as session:
             params = {
                 "uuid": uuid.hex if uuid else YSRecognizer.EMPTY_UUID.hex,
-                "topic": "queries",
+                "topic": self.topic,
                 "key": self.api_key,
-                "disableAntimat": "true"
+                "disableAntimat": str(self.disable_antimat).lower(),
+                "capitalize": str(self.capitalize).lower(),
+                "punctuation": str(self.punctuation).lower()
             }
 
             file = await self._download_ogg(session, url)
