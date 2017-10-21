@@ -33,8 +33,8 @@ class Server:
         if url is None and url is None:
             return web.Response(text="url is not specified", status=HTTPStatus.BAD_REQUEST)
 
-        if url and not self._is_ogg(url):
-            return web.Response(text="invalid url to ogg file", status=HTTPStatus.BAD_REQUEST)
+        if url and not self._is_mp3(url):
+            return web.Response(text="invalid url to mp3 file", status=HTTPStatus.BAD_REQUEST)
 
         try:
             with orm.db_session:

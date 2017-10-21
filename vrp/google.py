@@ -32,7 +32,7 @@ class GRecognizer(SpeechRecognizer):
         config = types.RecognitionConfig(
             encoding=enums.RecognitionConfig.AudioEncoding.FLAC,
             sample_rate_hertz=48000,
-            language_code="en-US")
+            language_code="ru-RU")
 
         return client.recognize(config, audio)
 
