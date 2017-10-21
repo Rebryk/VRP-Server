@@ -3,3 +3,4 @@ pony==0.7.2
 psycopg2==2.7.3.1
 aiohttp==2.3.1
 google-cloud==0.27.0
+pydub==0.20.0
