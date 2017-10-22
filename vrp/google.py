@@ -3,15 +3,15 @@ from io import BytesIO
 from uuid import UUID
 
 import pydub
-import speech_recognition as sr
 from aiohttp import ClientSession
 
 from .recognizer import SpeechRecognizer
 
 
 class GRecognizer(SpeechRecognizer):
+    EMPTY_UUID = UUID("00000000000000000000000000000000")
+
     def __init__(self):
-        self.asr = sr.Recognizer()
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @staticmethod
@@ -72,7 +72,7 @@ class GRecognizer(SpeechRecognizer):
             # convert audio file from mp3 to flac
             pydub.AudioSegment.from_mp3(raw_mp3).export(raw_flac, format="flac")
 
-            length = raw_flac.__sizeof__() / 6000
+            length = raw_flac.__sizeof__() / 25000
 
             if length < 59:
                 # read content
@@ -80,8 +80,9 @@ class GRecognizer(SpeechRecognizer):
                 response = self._transcribe_content(content)
             else:
                 self.logger.debug("Loading file to google storage")
-                self._upload_audio(uuid.hex, raw_flac)
-                response = self._transcribe_content_async("gs://vrp-audio/{}".format(uuid.hex))
+                file_name = uuid.hex if uuid else GRecognizer.EMPTY_UUID.hex
+                self._upload_audio(file_name, raw_flac)
+                response = self._transcribe_content_async("gs://vrp-audio/{}".format(file_name))
 
             text = response.results[0].alternatives[0].transcript if len(response.results) else ""
             self.logger.debug("Parse: {}".format(text))
