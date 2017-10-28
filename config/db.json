@@ -1,6 +1,0 @@
-{
-  "host": "localhost",
-  "database": "vrp",
-  "user": "postgres",
-  "password": "postgres"
-}

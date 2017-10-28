@@ -4,9 +4,7 @@ from http import HTTPStatus
 from json.decoder import JSONDecodeError
 
 from aiohttp import web
-from pony import orm
 
-from data import Audio, User
 from .recognizer import SpeechRecognizer
 
 
@@ -15,7 +13,6 @@ class Server:
         self.app = web.Application()
         self.app.router.add_post('/recognize', self.recognize_request)
         self.asr = asr
-        self.use_cache = use_cache
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def start(self, host: int, port: int):
@@ -37,8 +34,7 @@ class Server:
             return web.Response(text="invalid url to mp3 file", status=HTTPStatus.BAD_REQUEST)
 
         try:
-            with orm.db_session:
-                text = await self.recognize_audio(url, user_id)
+            text = await self.recognize_audio(url, user_id)
         except Exception as e:
             self.logger.error("Failed to recognize audio: {}".format(str(e)))
             return web.Response(text="failed to recognize audio", status=HTTPStatus.SERVICE_UNAVAILABLE)
@@ -46,25 +42,7 @@ class Server:
         return web.Response(text=text, status=HTTPStatus.OK)
 
     async def recognize_audio(self, url, user_id):
-        user = None
-
-        if user_id:
-            user = User.get(id=user_id) or User(id=user_id, uuid=uuid.uuid4())
-
-        # return text if audio was recognized before
-        if self.use_cache:
-            audio = Audio.get(url=url)
-
-            if audio and audio.text is not None:
-                return audio.text
-
-        text = await self.asr.recognize(url, user.uuid if user else None)
-
-        try:
-            if self.use_cache:
-                Audio(url=url, text=text, user=user)
-        except Exception as e:
-            self.logger.error("Failed to insert audio: {}".format(str(e)))
+        text = await self.asr.recognize(url, None)
 
         return text
 
